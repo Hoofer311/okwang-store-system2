@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Okwang Technical Institute Store System</title>
+    <style>
+        body { font-family: Arial; background:#f4f6f9; padding:20px; }
+        h1 { color:#003366; }
+        .box { background:white; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 0 5px rgba(0,0,0,0.1);}
+        input, select { padding:8px; margin:5px; }
+        button { padding:8px 12px; background:#003366; color:white; border:none; border-radius:4px; cursor:pointer; }
+        button:hover { background:#0055aa; }
+        table { width:100%; border-collapse: collapse; }
+        th, td { border:1px solid #ddd; padding:8px; text-align:left; }
+        th { background:#003366; color:white; }
+        .low { color:red; font-weight:bold; }
+    </style>
+</head>
+<body>
+
+<h1>Okwang Technical Institute Store Management System</h1>
+
+<div class="box" id="loginBox">
+    <h3>Login</h3>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<div class="box" id="mainSystem" style="display:none;">
+    <h3>Welcome <span id="currentUser"></span></h3>
+    <button onclick="logout()">Logout</button>
+
+    <hr>
+
+    <h3>Add Item</h3>
+    <input type="text" id="itemName" placeholder="Item Name">
+    <input type="number" id="itemQty" placeholder="Quantity">
+    <input type="number" id="lowLevel" placeholder="Low Stock Level">
+    <button onclick="addItem()">Add Item</button>
+
+    <hr>
+
+    <h3>Store Inventory</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Low Level</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="inventoryTable"></tbody>
+    </table>
+
+    <hr>
+
+    <h3>Create New User</h3>
+    <input type="text" id="newUser" placeholder="New Username">
+    <input type="password" id="newPass" placeholder="New Password">
+    <button onclick="createUser()">Create User</button>
+</div>
+
+<script>
+let users = JSON.parse(localStorage.getItem("users")) || {admin:"admin123"};
+let inventory = JSON.parse(localStorage.getItem("inventory")) || [];
+
+function saveData(){
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("inventory", JSON.stringify(inventory));
+}
+
+function login(){
+    let u = document.getElementById("username").value;
+    let p = document.getElementById("password").value;
+
+    if(users[u] && users[u] === p){
+        document.getElementById("loginBox").style.display="none";
+        document.getElementById("mainSystem").style.display="block";
+        document.getElementById("currentUser").innerText=u;
+        displayInventory();
+    } else {
+        alert("Invalid Login");
+    }
+}
+
+function logout(){
+    location.reload();
+}
+
+function createUser(){
+    let u = document.getElementById("newUser").value;
+    let p = document.getElementById("newPass").value;
+    users[u]=p;
+    saveData();
+    alert("User Created");
+}
+
+function addItem(){
+    let name = document.getElementById("itemName").value;
+    let qty = parseInt(document.getElementById("itemQty").value);
+    let low = parseInt(document.getElementById("lowLevel").value);
+
+    inventory.push({name, qty, low});
+    saveData();
+    displayInventory();
+}
+
+function displayInventory(){
+    let table="";
+    inventory.forEach(item=>{
+        let status = item.qty <= item.low ? "<span class='low'>LOW STOCK</span>" : "OK";
+        table+=`<tr>
+            <td>${item.name}</td>
+            <td>${item.qty}</td>
+            <td>${item.low}</td>
+            <td>${status}</td>
+        </tr>`;
+    });
+    document.getElementById("inventoryTable").innerHTML=table;
+}
+</script>
+
+</body>
+</html>
